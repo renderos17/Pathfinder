@@ -69,6 +69,26 @@ subprojects {
                         
                         staticLibArchiver.executable = compilerPrefix + staticLibArchiver.executable
                     }
+		    target("x64") {
+                        cCompiler.withArguments {args ->
+                            args << '-fPIC'
+                        }
+
+                        linker.withArguments { args ->
+                            args << '-shared'
+                        }
+
+                    }
+                    target("x86") {
+                        cCompiler.withArguments {args ->
+                            args << '-fPIC'
+                        }
+
+                        linker.withArguments { args ->
+                            args << '-shared'
+                        }
+
+                    }
                 }
                 
                 macGcc(Clang) {
