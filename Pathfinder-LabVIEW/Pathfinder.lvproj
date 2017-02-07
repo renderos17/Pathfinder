@@ -10,7 +10,7 @@
 		<Property Name="server.vi.callsEnabled" Type="Bool">true</Property>
 		<Property Name="server.vi.propertiesEnabled" Type="Bool">true</Property>
 		<Property Name="specify.custom.address" Type="Bool">false</Property>
-		<Item Name="Pathfinder.lvlib" Type="Library" URL="../Pathfinder/Pathfinder.lvlib"/>
+		<Item Name="Pathfinder.lvlib" Type="Library" URL="../Pathfinder-Lib/Pathfinder.lvlib"/>
 		<Item Name="Tank.vi" Type="VI" URL="../Tank.vi"/>
 		<Item Name="Dependencies" Type="Dependencies">
 			<Item Name="vi.lib" Type="Folder">

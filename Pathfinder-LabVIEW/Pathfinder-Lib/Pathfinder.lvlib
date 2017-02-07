@@ -21,5 +21,4 @@
 		<Item Name="Segment.ctl" Type="VI" URL="../VIs/Segment.ctl"/>
 		<Item Name="Waypoint.ctl" Type="VI" URL="../VIs/Waypoint.ctl"/>
 	</Item>
-	<Item Name="pathfinder.dll" Type="Document" URL="../pathfinder.dll"/>
 </Library>
