@@ -3,8 +3,14 @@
 
 #include "pathfinder/lib.h"
 
-CAPI int pathfinder_prepare(Waypoint *path, int path_length, void (*fit)(Waypoint,Waypoint,Spline*), int sample_count, double dt,
+CAPI int pathfinder_prepare(const Waypoint *path, int path_length, void (*fit)(Waypoint,Waypoint,Spline*), int sample_count, double dt,
         double max_velocity, double max_acceleration, double max_jerk, TrajectoryCandidate *cand);
+        
+CAPI int pathfinder_prepare_LabVIEW(const Waypoint *path, int path_length, int sample_count, double dt,
+        double max_velocity, double max_acceleration, double max_jerk);
+        
+CAPI int pathfinder_generate_LabVIEW(Segment *segments);
+
 CAPI int pathfinder_generate(TrajectoryCandidate *c, Segment *segments);
 
 CAPI void pf_trajectory_copy(Segment *src, Segment *dest, int length);
