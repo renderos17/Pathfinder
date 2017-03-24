@@ -1,32 +1,17 @@
 #include <pathfinder.h>
+#include <stdio.h>
 
 #define POINT_LENGTH 2
 
+Pathfinder::Segment segments_1d[1024];
+
 int main() {
-    Waypoint points[POINT_LENGTH];
+    int segs = Pathfinder::Profile::trapezoidal(&segments_1d[0], 0.01, 12, 6, 3);
 
-    Waypoint p1 = { 0, 0, d2r(0) };
-    Waypoint p2 = { -192, 0, d2r(0) };
-    // Waypoint p3 = {  0, 0, 0 };
-    points[0] = p1;
-    points[1] = p2;
-    // points[2] = p3;
-    
-    TrajectoryCandidate candidate;
-    
-    pathfinder_prepare(points, POINT_LENGTH, FIT_HERMITE_CUBIC, PATHFINDER_SAMPLES_LOW, 0.05, 15.0, 10.0, 60.0, &candidate);
+    printf("Segment Count (Trapezoidal): %d\n", segs);
 
-    int length = candidate.length;
-
-    // Array of Segments (the trajectory points) to store the trajectory in
-    Segment *trajectory = malloc(length * sizeof(Segment));
-
-    // Generate the trajectory
-    int result = pathfinder_generate(&candidate, trajectory);
-    printf("%d\n", result);
-    
-    FILE *fp = fopen("out.csv", "w");
-    pathfinder_serialize_csv(fp, trajectory, result);
+    FILE *fp = fopen("out/profile/trapezoidal.csv", "w");
+    Pathfinder::IO::csv_profile_write(fp, &segments_1d[0], segs);
     fclose(fp);
 
     return 0;

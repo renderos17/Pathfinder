@@ -6,7 +6,7 @@ def toolChainPath = project.hasProperty('toolChainPath') ? project.toolChainPath
 def roborioToolchain = project.hasProperty('roborioToolchain') ? project.roborioToolchain : null
 
 subprojects {
-    plugins.withType(CPlugin).whenPluginAdded {
+    plugins.withType(CppPlugin).whenPluginAdded {
         model {
             platforms {
                 arm {

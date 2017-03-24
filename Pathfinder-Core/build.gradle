@@ -1,18 +1,17 @@
-apply plugin: 'c'
+apply plugin: 'cpp'
 
 model {
     components {
         pathfinder(NativeLibrarySpec) {
             targetPlatform 'arm'
-            targetPlatform 'roborio'
             targetPlatform 'x86'
             targetPlatform 'x64'
             
             sources {
-                c {
+                cpp {
                     source {
                         srcDirs = ['src']
-                        includes = ['**/*.c']
+                        includes = ['**/*.cpp']
                     }
                     exportedHeaders {
                         srcDirs = ['include']

@@ -1,15 +1,14 @@
-apply plugin: 'c'
+apply plugin: 'cpp'
 
 model {
     components {
         pathfinder_test(NativeExecutableSpec) {
             targetPlatform 'arm'
-            targetPlatform 'roborio'
             targetPlatform 'x86'
             targetPlatform 'x64'
             
             sources {
-                c {
+                cpp {
                     source {
                         srcDirs = ["."]
                         includes = ["test.cpp"]
