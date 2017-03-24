@@ -20,11 +20,13 @@
 *.dSYM/
 Pathfinder-Java/build/
 Pathfinder-Java/out/
+Pathfinder-Java/src/test/
 *.csv
 Pathfinder-Java/.gradle/
 Pathfinder-Core/build/
+test/build
 .gradle/
 out/
 .idea
 
-/test/
+.vscode/
