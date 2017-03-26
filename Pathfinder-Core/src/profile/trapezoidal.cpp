@@ -53,7 +53,7 @@ int Pathfinder::Profile::trapezoidal(Pathfinder::Segment *out, float timescale, 
     return Pathfinder::Profile::trapezoidal(out, timescale, 0, distance, 0, max_velocity, acceleration);
 }
 
-int Pathfinder::Profile::trapezoidal(Pathfinder::Segment *out, int *shiftlevel_out, Pathfinder::ShiftLevel *shiftlevels, int shiftlevel_count, float timescale, float distance) {
+int Pathfinder::Profile::trapezoidal(Pathfinder::Segment *out, int *shiftlevel_out, Pathfinder::ShiftLevel *shiftlevels, unsigned int shiftlevel_count, float timescale, float distance) {
     if (shiftlevel_count == 0) return -1;
     if (shiftlevel_count == 1) {
         return Pathfinder::Profile::trapezoidal(out, timescale, distance, shiftlevels[0].max_velocity, shiftlevels[0].acceleration);

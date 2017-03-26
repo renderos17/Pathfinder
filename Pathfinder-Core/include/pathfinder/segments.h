@@ -14,7 +14,7 @@ namespace Pathfinder {
     struct Segment2D {
         float x;
         float y;
-        float heading;
+        float angle;
     };
     #pragma pack(pop)
 }

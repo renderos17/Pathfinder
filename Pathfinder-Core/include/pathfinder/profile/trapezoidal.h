@@ -14,6 +14,6 @@ namespace Pathfinder {
         // Calculate a trapezoidal linear motion profile
         int trapezoidal(Pathfinder::Segment *out, float timescale, float distance, float max_velocity, float acceleration);
         int trapezoidal(Pathfinder::Segment *out, float timescale, float pos_0, float pos_1, float vel_off, float max_velocity, float acceleration);
-        int trapezoidal(Pathfinder::Segment *out, int *shiftlevel_out, Pathfinder::ShiftLevel *shiftlevels, int shiftlevel_count, float timescale, float distance);
+        int trapezoidal(Pathfinder::Segment *out, int *shiftlevel_out, Pathfinder::ShiftLevel *shiftlevels, unsigned int shiftlevel_count, float timescale, float distance);
     }
 }
