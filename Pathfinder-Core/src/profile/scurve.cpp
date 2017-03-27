@@ -1,6 +1,11 @@
 #include "pathfinder/profile/scurve.h"
 #include "pathfinder/math.h"
 
+#include <mutex>
+
+static float f1_buffer[8192];
+static std::mutex mtx;
+
 int Pathfinder::Profile::scurve(Pathfinder::Segment *out, float timescale, float distance, float max_velocity, float max_acceleration, float jerk) {
     float ma2 = max_acceleration * max_acceleration;
     float mj2 = jerk * jerk;
@@ -16,7 +21,8 @@ int Pathfinder::Profile::scurve(Pathfinder::Segment *out, float timescale, float
     float impulse = distance / checked_max_velocity / timescale;
     int len = (int)ceil(filter_1 + filter_2 + impulse);
 
-    float f1_buffer[len];
+    // Mutex needed for f1_buffer
+    std::lock_guard<std::mutex> guard(mtx);
     float f1_last = 0, f2 = 0, last_vel = 0, last_dist = 0, last_acc = 0;
     int i;
     for (i = 0; i < len; i++) {
