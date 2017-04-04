@@ -3,7 +3,7 @@
 namespace Pathfinder {
     #pragma pack(push, 4)
     struct Segment {
-        float timescale;
+        float time;
         float distance;
         float velocity;
         float acceleration;
