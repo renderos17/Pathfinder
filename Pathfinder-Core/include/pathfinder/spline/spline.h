@@ -9,6 +9,8 @@ namespace Pathfinder {
         struct Spline {
             virtual void calculate(Pathfinder::Spline::SplineCoord *out, double time) = 0;
             virtual double deriv(double time) = 0;
+            // Arc length should cache the arc length once calculated, acting as a getter
+            // for all but the first call.
             virtual double arc_length(unsigned int samples) = 0;
         };
 

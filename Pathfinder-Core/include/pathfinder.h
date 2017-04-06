@@ -7,3 +7,5 @@
 #include "pathfinder/profile/trapezoidal.h"
 
 #include "pathfinder/spline/hermite.h"
+
+#include "pathfinder/trajectory/coupled.h"

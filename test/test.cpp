@@ -4,10 +4,11 @@
 
 Pathfinder::Segment segments_1d[BUF_SIZE];      // Holds Distance, Velocity, Acceleration
 Pathfinder::Segment2D segments_2d[BUF_SIZE];    // Holds X, Y, Angle
+Pathfinder::Trajectory::CoupledSegment cs;
 
 Pathfinder::Spline::Hermite splines[32];    // Holds our 2D position splines
 int samples = 10000;                        // High Sample Rate for a smooth curve
-double timescale = 0.001;                    // Generate points for every 0.01 seconds
+double timescale = 0.001;                   // Generate points for every 0.01 seconds
 
 int main() {
     float setpoint = 10;
@@ -15,19 +16,28 @@ int main() {
     float accel = 1.5;
     float time = 0;
 
-    FILE *fp = fopen("out/trap.csv", "w");
-    fputs("time,distance,velocity,acceleration\n", fp);
+    Pathfinder::Spline::Hermite::Waypoint wps[3] = {
+        { 0, 0, 0 },
+        { 4, 6, d2r(45) },
+        { 6, 10, d2r(90) }
+    };
 
-    Pathfinder::Segment seg = { 0,0,0,0 };
-    Pathfinder::Profile::Trapezoidal profile(setpoint, max_vel, accel);
+    Pathfinder::Profile::Trapezoidal profile(max_vel, accel);
+    int spline_count = Pathfinder::Spline::hermite(Pathfinder::Spline::HermiteCubic, wps, 3, splines);
+
+    Pathfinder::Trajectory::Coupled trajectory(0.5);
+    trajectory.configure_path(splines, spline_count, samples);
+    trajectory.configure_profile(&profile);
+
+    FILE *fp = fopen("out/traj2.csv", "w");
+    fputs("time,x,yc,yl,yr,vc,vl,vr,angle\n", fp);
     bool done = false;
     while (!done) {
-        uint8_t result = profile.calculate(&seg, &seg, time);
+        done = trajectory.calculate(&cs, &cs, time);
+        fprintf(fp, "%.3f,%.3f,%.3f,,,%.3f,,,%.3f\n", time, cs.center_2.x, cs.center_2.y, cs.center.velocity, r2d(cs.center_2.angle));
+        fprintf(fp, "%.3f,%.3f,,%.3f,,,%.3f,,%.3f\n", time, cs.left_2.x, cs.left_2.y, cs.left.velocity, r2d(cs.left_2.angle));
+        fprintf(fp, "%.3f,%.3f,,,%.3f,,,%.3f,%.3f\n", time, cs.right_2.x, cs.right_2.y, cs.right.velocity, r2d(cs.right_2.angle));
         time += timescale;
-        fprintf(fp, "%.3f,%.3f,%.3f,%.3f\n", seg.time, seg.distance, seg.velocity, seg.acceleration);
-        printf("Time: %.3f Dist: %.3f Vel: %.3f Acc: %.3f\n", seg.time, seg.distance, seg.velocity, seg.acceleration);
-        done = result == Pathfinder::Profile::STATUS_DONE;
-        // if (time/timescale >= 50) break;
     }
     fclose(fp);
     return 0;

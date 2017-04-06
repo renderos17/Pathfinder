@@ -13,7 +13,13 @@ namespace Pathfinder {
         };
 
         struct Profile {
+            // Setpoing Get/Set
+            void setpoint(float newsetpoint) { _setpoint = newsetpoint; }
+            float setpoint() { return _setpoint; }
+
             virtual uint8_t calculate(Pathfinder::Segment *segment_out, Pathfinder::Segment *last_segment, float time) = 0;
+
+            float _setpoint;
         };
     }
 }

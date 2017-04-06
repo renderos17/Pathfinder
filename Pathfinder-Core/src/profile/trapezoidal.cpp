@@ -1,8 +1,7 @@
 #include "pathfinder/profile/trapezoidal.h"
 #include "pathfinder/math.h"
 
-void Pathfinder::Profile::Trapezoidal::configure(float setpoint, float max_velocity, float acceleration) {
-    _setpoint = setpoint;
+void Pathfinder::Profile::Trapezoidal::configure(float max_velocity, float acceleration) {
     _max_velocity = max_velocity;
     _acceleration = acceleration;
 }
