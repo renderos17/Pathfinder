@@ -18,7 +18,7 @@ int main() {
 
     Pathfinder::Spline::Hermite::Waypoint wps[3] = {
         { 0, 0, 0 },
-        { 4, 0 ,0 },
+        { 4, 0, 0 },
         { 9, 4, d2r(45) }
     };
 

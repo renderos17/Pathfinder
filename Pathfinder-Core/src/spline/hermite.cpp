@@ -16,6 +16,8 @@ void Pathfinder::Spline::Hermite::configure(Pathfinder::Spline::Hermite_Type typ
     tangent0 = tan(start->angle - aoffset);
     tangent1 = tan(end->angle - aoffset);
 
+    fit_type = type;
+
     last_arc_calc_samples = 0;
 }
 
@@ -23,11 +25,15 @@ void Pathfinder::Spline::Hermite::calculate(Pathfinder::Spline::SplineCoord *out
     out->time = t;
     double x = hyp_distance * t;
     double y = 0;
-    // TODO Quintic Support
     if (fit_type == HermiteCubic) {
         y = ((tangent0 + tangent1) * hyp_distance * t*t*t)
             + (-(2 * tangent0 + tangent1) * hyp_distance * t*t)
             + tangent0 * hyp_distance * t;
+    } else if (fit_type == HermiteQuintic) {
+        y = (-(3 * (tangent0+tangent1))) * hyp_distance * t*t*t*t*t
+            + (8 * tangent0 + 7 * tangent1) * hyp_distance * t*t*t*t
+            + (-(6 * tangent0 + 4 * tangent1)) * hyp_distance * t*t*t
+            + (tangent0) * hyp_distance * t;
     }
 
     // Translate back to global x/y axis
@@ -38,9 +44,16 @@ void Pathfinder::Spline::Hermite::calculate(Pathfinder::Spline::SplineCoord *out
 
 double Pathfinder::Spline::Hermite::deriv(double t) {
     double x = hyp_distance * t;
-    return (3 * (tangent0 + tangent1) * t*t) 
-            + (2*(-(2 * tangent0 + tangent1) * t)) 
-            + tangent0;
+    if (fit_type == HermiteCubic) {
+        return (3 * (tangent0 + tangent1) * t*t) 
+                + (2*(-(2 * tangent0 + tangent1) * t)) 
+                + tangent0;
+    } else if (fit_type == HermiteQuintic) {
+        return 5 * (-(3*(tangent0 + tangent1))) * t*t*t*t
+                + 4 * (8 * tangent0 + 7 * tangent1) * t*t*t
+                + 3 * (-(6 * tangent0 + 4 * tangent1)) * t*t
+                + tangent0;
+    }
 }
 
 double Pathfinder::Spline::Hermite::arc_length(unsigned int samples) {

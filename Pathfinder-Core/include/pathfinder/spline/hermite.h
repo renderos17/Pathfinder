@@ -5,7 +5,7 @@
 namespace Pathfinder {
     namespace Spline {
         enum Hermite_Type {
-            HermiteCubic
+            HermiteCubic, HermiteQuintic
         };
         struct Hermite : Pathfinder::Spline::Spline {
             struct Waypoint {
