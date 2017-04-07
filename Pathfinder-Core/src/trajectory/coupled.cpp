@@ -1,8 +1,6 @@
 #include "pathfinder/trajectory/coupled.h"
 #include "pathfinder/math.h"
 
-#include <stdio.h>
-
 #define SPLINE(index) ((Pathfinder::Spline::Spline *)((uint8_t *)(_splines) + index*_spline_size))
 
 int Pathfinder::Trajectory::Coupled::calculate(Pathfinder::Trajectory::CoupledSegment *segments_out, Pathfinder::Trajectory::CoupledSegment *last_segment, float time) {
@@ -10,10 +8,10 @@ int Pathfinder::Trajectory::Coupled::calculate(Pathfinder::Trajectory::CoupledSe
     if (last_segment == nullptr) last_segment = &zero_seg;
 
     float cur_distance = last_segment->center.distance;
+    _profile->setpoint(_total_distance);
 
     if (cur_distance >= _total_distance) {
         // Path complete, nothing more
-        // TODO set cleanup
         return 1; 
     }
 
@@ -49,6 +47,9 @@ int Pathfinder::Trajectory::Coupled::calculate(Pathfinder::Trajectory::CoupledSe
     float   last_center_dist = last_segment->center.distance,
             last_left_dist  = last_segment->left.distance,
             last_right_dist = last_segment->right.distance;
+    float   last_center_vel = last_segment->center.velocity,
+            last_left_vel = last_segment->left.velocity,
+            last_right_vel = last_segment->right.velocity;
     
     if (time == 0) {
         last_angle = coord_center.angle;
@@ -67,11 +68,6 @@ int Pathfinder::Trajectory::Coupled::calculate(Pathfinder::Trajectory::CoupledSe
     segments_out->right_2.x = coord_center.x + (_wheelbase * sina);
     segments_out->right_2.y = coord_center.y - (_wheelbase * cosa);
 
-    // Start calculating the 1D Segments (distance / velocity / acceleration)
-    segments_out->center.time = time;
-    segments_out->left.time = time;
-    segments_out->right.time = time;
-
     float angular_vel = (coord_center.angle - last_angle);
     if (angular_vel > M_PI) angular_vel = 2*M_PI - angular_vel;
     if (angular_vel < -M_PI) angular_vel = 2*M_PI + angular_vel;
@@ -81,7 +77,13 @@ int Pathfinder::Trajectory::Coupled::calculate(Pathfinder::Trajectory::CoupledSe
     }
 
     float tangential_speed = angular_vel * _wheelbase;
-    float profile_max_vel = 3;     // TODO: Make this based on profile output at time.
+    int profile_result = _profile->calculate(&segments_out->center, &last_segment->center, time);
+    float profile_max_vel = segments_out->center.velocity;
+
+    // Start calculating the 1D Segments (distance / velocity / acceleration)
+    segments_out->center.time = time;
+    segments_out->left.time = time;
+    segments_out->right.time = time;
 
     float vr, vl;
     if (angular_vel > 0) {
@@ -106,6 +108,14 @@ int Pathfinder::Trajectory::Coupled::calculate(Pathfinder::Trajectory::CoupledSe
     segments_out->center.distance = last_center_dist + (center_speed*dt);
     segments_out->left.distance = last_left_dist + (vl*dt);
     segments_out->right.distance = last_right_dist + (vr*dt);
-
+    
+    if (dt == 0) {
+        segments_out->left.acceleration = segments_out->center.acceleration;
+        segments_out->right.acceleration = segments_out->center.acceleration;
+    } else {
+        segments_out->center.acceleration = (center_speed - last_center_vel) / dt;
+        segments_out->left.acceleration = (vl - last_left_vel) / dt;
+        segments_out->right.acceleration = (vr - last_right_vel) / dt;
+    }
     return 0;
 }

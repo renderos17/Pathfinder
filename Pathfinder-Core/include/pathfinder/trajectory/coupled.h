@@ -2,7 +2,8 @@
 #include "pathfinder/spline/spline.h"
 #include "pathfinder/profile/profile.h"
 
-#include <inttypes.h>
+#include <cinttypes>
+#include <cstddef>
 
 namespace Pathfinder {
     namespace Trajectory {
