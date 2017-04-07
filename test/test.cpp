@@ -19,7 +19,7 @@ int main() {
     Pathfinder::Spline::Hermite::Waypoint wps[3] = {
         { 0, 0, 0 },
         { 4, 0 ,0 },
-        { 9, 4, d2r(90) }
+        { 9, 4, d2r(45) }
     };
 
     Pathfinder::Profile::Trapezoidal profile(max_vel, accel);
