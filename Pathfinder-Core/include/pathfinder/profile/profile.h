@@ -18,7 +18,7 @@ namespace Pathfinder {
         };
 
         struct Profile {
-            // Setpoing Get/Set
+            // Setpoint Get/Set
             void setpoint(float newsetpoint) { _setpoint = newsetpoint; }
             float setpoint() { return _setpoint; }
 
