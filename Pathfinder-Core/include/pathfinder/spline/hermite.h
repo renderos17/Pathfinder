@@ -8,6 +8,12 @@ namespace Pathfinder {
             HermiteCubic, HermiteQuintic
         };
         struct Hermite : Pathfinder::Spline::Spline {
+            // ANGLE_AUTO will only work using the Pathfinder::Spline::hermite() namespace method, not
+            // in the constructor or configure() method of Pathfinder::Spline::Hermite
+            // Furthermore, ANGLE_AUTO will work on every waypoint that is NOT the first
+            // waypoint in the array, as the auto-generated angle is based on the slope of the 
+            // line joining waypoint and waypoint-1
+            constexpr static double ANGLE_AUTO = 100000;  // Magic Number
             struct Waypoint {
                 double x, y, angle;
             };
