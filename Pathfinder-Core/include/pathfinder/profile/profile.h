@@ -22,9 +22,13 @@ namespace Pathfinder {
             void setpoint(float newsetpoint) { _setpoint = newsetpoint; }
             float setpoint() { return _setpoint; }
 
+            // Setpoint Tolerance Get/Set
+            void tolerance(float newtolerance) { _tolerance = newtolerance; }
+            float tolerance() { return _tolerance; }
+
             virtual uint8_t calculate(Pathfinder::Segment *segment_out, Pathfinder::Segment *last_segment, float time) = 0;
 
-            float _setpoint;
+            float _setpoint = 0, _tolerance = 0.05;
         };
 
         struct Shiftable {

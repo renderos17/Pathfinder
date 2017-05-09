@@ -51,6 +51,12 @@ int Pathfinder::Trajectory::Coupled::calculate(Pathfinder::Trajectory::CoupledSe
             last_left_vel = last_segment->left.velocity,
             last_right_vel = last_segment->right.velocity;
     
+    int profile_result = _profile->calculate(&segments_out->center, &last_segment->center, time);
+    if (profile_result == Pathfinder::Profile::STATUS_DONE) {
+        // Path is complete, nothing more to do.
+        return 1;
+    }
+
     if (time == 0) {
         last_angle = coord_center.angle;
     }
@@ -77,7 +83,6 @@ int Pathfinder::Trajectory::Coupled::calculate(Pathfinder::Trajectory::CoupledSe
     }
 
     float tangential_speed = angular_vel * _wheelbase;
-    int profile_result = _profile->calculate(&segments_out->center, &last_segment->center, time);
     float profile_max_vel = segments_out->center.velocity;
 
     // Start calculating the 1D Segments (distance / velocity / acceleration)

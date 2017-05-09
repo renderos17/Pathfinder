@@ -1,9 +1,12 @@
 #include "pathfinder/profile/trapezoidal.h"
 #include "pathfinder/math.h"
 
-void Pathfinder::Profile::Trapezoidal::configure(float max_velocity, float acceleration) {
+#define SAME_SIGN(x,y) ((x<0) == (y<0))
+
+void Pathfinder::Profile::Trapezoidal::configure(float max_velocity, float acceleration, float tolerance) {
     _max_velocity = max_velocity;
     _acceleration = acceleration;
+    _tolerance = tolerance;
 }
 
 void Pathfinder::Profile::Trapezoidal::configure_shift(ShiftLevel *levels, int level_count) {
@@ -39,42 +42,45 @@ uint8_t Pathfinder::Profile::Trapezoidal::calculate(Pathfinder::Segment *segment
             l_acc = last_segment->acceleration;
     
     segment_out->time = time;
+    float dt = time - l_time;
 
-    // t = v/a
-    // s = ut + 0.5at^2
-    // s = l_vel*t - 0.5*accel*t*t
-    float   decel_time = l_vel / _acceleration,
-            decel_dist = l_vel * decel_time - 0.5*_acceleration*decel_time*decel_time;
-
-    float   dt = time - l_time;
-
-    if (l_dist >= _setpoint) {
+    if (fabs(l_dist - _setpoint) <= _tolerance) {
         // Drop all to 0 and return
         segment_out->acceleration = 0;
         segment_out->velocity = 0;
         segment_out->distance = l_dist;
         status = Pathfinder::Profile::STATUS_DONE;
+        // We don't need to calculate shifting if we've finished the path...
+        return status;
     }
 
-    if (l_dist + decel_dist >= _setpoint) {
-        // If we start decelerating now, we'll hit the setpoint
-        // We're in the 'speed down' section of the profile
-        // TODO: The Deceleration Case
-        segment_out->acceleration = -_acceleration;
-        // v = u - at
-        segment_out->velocity = l_vel - (_acceleration * dt);
-        // s = s0 + ut - 0.5at^2
-        segment_out->distance = l_dist + (l_vel * dt) - (0.5 * _acceleration * dt * dt);
+    float accel = 0;
+    if (l_dist < _setpoint) {
+        // Below setpoint, accelerate to setpoint (+ve)
+        accel = _acceleration;
+    } else {
+        // Above setpoint, accelerate to setpoint (-ve)
+        accel = -_acceleration;
+    }
+
+    float   decel_time = l_vel / accel,
+            decel_dist = l_vel * decel_time - 0.5*accel*decel_time*decel_time;
+    
+    float   decel_error = l_dist + decel_dist - _setpoint;
+
+    if (fabs(decel_error) <= _tolerance 
+            || (_setpoint < 0 && decel_error < _tolerance) 
+            || (_setpoint > 0 && decel_error > _tolerance)) {
+
+        segment_out->acceleration = -accel;
+        segment_out->velocity = l_vel - (accel * dt);
+        segment_out->distance = l_dist + (l_vel * dt) - (0.5 * accel * dt * dt);
         status = Pathfinder::Profile::STATUS_DECEL;
-    }
-
-    if (l_vel < _max_velocity) {
-        // We're in the 'speed up' section of the profile
-        segment_out->acceleration = _acceleration;
-        // v = u + at
-        segment_out->velocity = MIN(l_vel + (_acceleration * dt), _max_velocity);
-        // s = s0 + ut + 0.5at^2
-        segment_out->distance = l_dist + (l_vel * dt) + (0.5 * _acceleration * dt * dt);
+    } else if (fabs(l_vel) < _max_velocity) {
+        segment_out->acceleration = accel;
+        float v = l_vel + (accel * dt);
+        segment_out->velocity = (v < -_max_velocity ? -_max_velocity : (v > _max_velocity ? _max_velocity : v));
+        segment_out->distance = l_dist + (l_vel * dt) + (0.5 * accel * dt * dt);
         status = Pathfinder::Profile::STATUS_ACCEL;
     }
 
@@ -84,7 +90,7 @@ uint8_t Pathfinder::Profile::Trapezoidal::calculate(Pathfinder::Segment *segment
         segment_out->velocity = l_vel;
         segment_out->distance = l_dist + (l_vel * dt);
     } else if (_slconfigured) {
-        float cur_v = segment_out->velocity;
+        float cur_v = fabs(segment_out->velocity);
         if (_slcurrent + 1 < _slcount) {
             ShiftLevel *up = (_slvls + _slcurrent + 1);
             if (cur_v > up->threshold_velocity) {

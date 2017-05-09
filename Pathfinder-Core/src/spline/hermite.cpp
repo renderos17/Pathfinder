@@ -81,13 +81,13 @@ double Pathfinder::Spline::Hermite::arc_length(unsigned int samples) {
 
 int Pathfinder::Spline::hermite(Pathfinder::Spline::Hermite_Type type, Pathfinder::Spline::Hermite::Waypoint *waypoints, unsigned int waypoint_count, Pathfinder::Spline::Hermite *splines_out) {
     int i;
-    for (i = 1; i < waypoint_count; i++) {
-        if (waypoints[i].angle == Pathfinder::Spline::Hermite::ANGLE_AUTO) {
-            double dx = waypoints[i].x - waypoints[i-1].x;
-            double dy = waypoints[i].y - waypoints[i-1].y;
-            waypoints[i].angle = atan2(dy, dx);
-        }
-    }
+    // for (i = 1; i < waypoint_count; i++) {
+    //     if (waypoints[i].angle == Pathfinder::Spline::Hermite::ANGLE_AUTO) {
+    //         double dx = waypoints[i].x - waypoints[i-1].x;
+    //         double dy = waypoints[i].y - waypoints[i-1].y;
+    //         waypoints[i].angle = atan2(dy, dx);
+    //     }
+    // }
     
     for (i = 0; i < waypoint_count - 1; i++) {
         splines_out[i].configure(type, &waypoints[i], &waypoints[i+1]);
