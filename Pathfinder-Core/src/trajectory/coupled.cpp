@@ -1,7 +1,9 @@
 #include "pathfinder/trajectory/coupled.h"
 #include "pathfinder/math.h"
 
+#ifndef SPLINE
 #define SPLINE(index) ((Pathfinder::Spline::Spline *)((uint8_t *)(_splines) + index*_spline_size))
+#endif
 
 int Pathfinder::Trajectory::Coupled::calculate(Pathfinder::Trajectory::CoupledSegment *segments_out, Pathfinder::Trajectory::CoupledSegment *last_segment, float time) {
     Pathfinder::Trajectory::CoupledSegment zero_seg;
