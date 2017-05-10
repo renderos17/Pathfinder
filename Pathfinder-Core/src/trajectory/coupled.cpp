@@ -15,6 +15,22 @@ int Pathfinder::Trajectory::Coupled::calculate(Pathfinder::Trajectory::CoupledSe
         return 1; 
     }
 
+    // Cache the values from last_segment just incase segments_out is equal to last_segment
+    float   dt = time - last_segment->center.time;
+    float   last_angle = last_segment->center_2.angle;
+    float   last_center_dist = last_segment->center.distance,
+            last_left_dist  = last_segment->left.distance,
+            last_right_dist = last_segment->right.distance;
+    float   last_center_vel = last_segment->center.velocity,
+            last_left_vel = last_segment->left.velocity,
+            last_right_vel = last_segment->right.velocity;
+    
+    int profile_result = _profile->calculate(&segments_out->center, &last_segment->center, time);
+    if (profile_result == Pathfinder::Profile::STATUS_DONE) {
+        // Path is complete, nothing more to do.
+        return 1;
+    }
+
     // Target Spline is our current, starting spline (i.e. we currently lay
     // between target_spline and target_spline+1)
     int target_spline = 0;
@@ -40,22 +56,6 @@ int Pathfinder::Trajectory::Coupled::calculate(Pathfinder::Trajectory::CoupledSe
 
     float   cosa = cos(coord_center.angle),
             sina = sin(coord_center.angle);
-
-    // Cache the values from last_segment just incase segments_out is equal to last_segment
-    float   dt = time - last_segment->center.time;
-    float   last_angle = last_segment->center_2.angle;
-    float   last_center_dist = last_segment->center.distance,
-            last_left_dist  = last_segment->left.distance,
-            last_right_dist = last_segment->right.distance;
-    float   last_center_vel = last_segment->center.velocity,
-            last_left_vel = last_segment->left.velocity,
-            last_right_vel = last_segment->right.velocity;
-    
-    int profile_result = _profile->calculate(&segments_out->center, &last_segment->center, time);
-    if (profile_result == Pathfinder::Profile::STATUS_DONE) {
-        // Path is complete, nothing more to do.
-        return 1;
-    }
 
     if (time == 0) {
         last_angle = coord_center.angle;
