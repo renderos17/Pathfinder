@@ -1,8 +1,6 @@
 #include "pathfinder/profile/trapezoidal.h"
 #include "pathfinder/math.h"
 
-#define SAME_SIGN(x,y) ((x<0) == (y<0))
-
 void Pathfinder::Profile::Trapezoidal::configure(float max_velocity, float acceleration, float tolerance) {
     _max_velocity = max_velocity;
     _acceleration = acceleration;

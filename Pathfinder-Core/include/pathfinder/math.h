@@ -11,6 +11,10 @@
     #define MAX(a,b) (((a)>(b))?(a):(b))
 #endif
 
+#ifndef SAME_SIGN
+    #define SAME_SIGN(x,y) ((x<0) == (y<0))
+#endif
+
 #define d2r(deg) (deg*M_PI/180.0)
 #define r2d(rad) (rad*180.0/M_PI)
 
