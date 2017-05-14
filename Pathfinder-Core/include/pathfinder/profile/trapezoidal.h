@@ -24,6 +24,7 @@ namespace Pathfinder {
             void set_shift(int level);
 
             float _max_velocity, _acceleration;
+            float _distance_integral = 0;   // This is used internally for SCurve profile generation
             ShiftLevel *_slvls;
             int _slcount, _slcurrent;
             bool _slconfigured;

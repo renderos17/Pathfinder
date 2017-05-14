@@ -5,6 +5,8 @@ void Pathfinder::Profile::Trapezoidal::configure(float max_velocity, float accel
     _max_velocity = max_velocity;
     _acceleration = acceleration;
     _tolerance = tolerance;
+
+    _slconfigured = false;
 }
 
 void Pathfinder::Profile::Trapezoidal::configure_shift(ShiftLevel *levels, int level_count) {
@@ -66,6 +68,8 @@ uint8_t Pathfinder::Profile::Trapezoidal::calculate(Pathfinder::Segment *segment
     
     float   decel_error = l_dist + decel_dist - _setpoint;
 
+    float   sixth = 1 / 6.0;
+
     if (fabs(decel_error) <= _tolerance 
             || (_setpoint < 0 && decel_error < _tolerance) 
             || (_setpoint > 0 && decel_error > _tolerance)) {
@@ -73,12 +77,14 @@ uint8_t Pathfinder::Profile::Trapezoidal::calculate(Pathfinder::Segment *segment
         segment_out->acceleration = -accel;
         segment_out->velocity = l_vel - (accel * dt);
         segment_out->distance = l_dist + (l_vel * dt) - (0.5 * accel * dt * dt);
+        _distance_integral += l_dist * dt + (0.5 * l_vel * dt*dt) + (sixth * (-accel) * dt*dt*dt);
         status = Pathfinder::Profile::STATUS_DECEL;
     } else if (fabs(l_vel) < _max_velocity) {
         segment_out->acceleration = accel;
         float v = l_vel + (accel * dt);
         segment_out->velocity = (v < -_max_velocity ? -_max_velocity : (v > _max_velocity ? _max_velocity : v));
         segment_out->distance = l_dist + (l_vel * dt) + (0.5 * accel * dt * dt);
+        _distance_integral += l_dist * dt + (0.5 * l_vel * dt*dt) + (sixth * accel * dt*dt*dt);
         status = Pathfinder::Profile::STATUS_ACCEL;
     }
 
@@ -87,6 +93,7 @@ uint8_t Pathfinder::Profile::Trapezoidal::calculate(Pathfinder::Segment *segment
         segment_out->acceleration = 0;
         segment_out->velocity = l_vel;
         segment_out->distance = l_dist + (l_vel * dt);
+        _distance_integral += l_dist * dt + (0.5 * l_vel * dt*dt);
     } else if (_slconfigured) {
         float cur_v = fabs(segment_out->velocity);
         if (_slcurrent + 1 < _slcount) {

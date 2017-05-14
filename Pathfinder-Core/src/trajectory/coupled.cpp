@@ -5,6 +5,8 @@
 #define SPLINE(index) ((Pathfinder::Spline::Spline *)((uint8_t *)(_splines) + index*_spline_size))
 #endif
 
+#include <stdio.h>
+
 int Pathfinder::Trajectory::Coupled::calculate(Pathfinder::Trajectory::CoupledSegment *segments_out, Pathfinder::Trajectory::CoupledSegment *last_segment, float time) {
     Pathfinder::Trajectory::CoupledSegment zero_seg;
     if (last_segment == nullptr) last_segment = &zero_seg;
@@ -105,6 +107,14 @@ int Pathfinder::Trajectory::Coupled::calculate(Pathfinder::Trajectory::CoupledSe
         vr = vl + tangential_speed;
     }
 
+    // TODO: Our sampling dt here is way too large, resulting in a path that doesn't track properly
+    // To fix this, we really need to calculate all this either a) as a proper integral, or b) use smaller
+    // dt with more samples.
+    // Maybe we could partially solve this with a trapezoidal numerical integration?
+    // TODO: Check this in trapezoidal.cpp, too? Could prevent sudden decelerations (ideally in deceleration
+    // calculations)
+
+
     // The average speed between the two sides of the drivetrain will be the resultant 'effective' speed
     // at the center. 
     float center_speed = (vl + vr) / 2;
@@ -121,6 +131,7 @@ int Pathfinder::Trajectory::Coupled::calculate(Pathfinder::Trajectory::CoupledSe
         segments_out->right.acceleration = segments_out->center.acceleration;
     } else {
         segments_out->center.acceleration = (center_speed - last_center_vel) / dt;
+        printf("%.0f -> %.2f, %.2f, %.2f\n", segments_out->center.acceleration, center_speed, last_center_vel, profile_max_vel);
         segments_out->left.acceleration = (vl - last_left_vel) / dt;
         segments_out->right.acceleration = (vr - last_right_vel) / dt;
     }

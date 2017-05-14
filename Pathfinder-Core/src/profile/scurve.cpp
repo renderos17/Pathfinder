@@ -41,9 +41,6 @@ uint8_t Pathfinder::Profile::SCurve::calculate(Pathfinder::Segment *segment_out,
         return status;
     }
 
-    // TODO: Find when to de-jerk
-    // We could legit just use another trapezoidal profile for this, but give it values of velocity instead of distance
-
     float jerk = 0;
     if (l_dist < _setpoint) {
         // Below setpoint
@@ -54,53 +51,64 @@ uint8_t Pathfinder::Profile::SCurve::calculate(Pathfinder::Segment *segment_out,
     }
 
     int vpstatus = 0;
-
-    // float   dejerk_time = (-l_acc - sqrt(l_acc*l_acc-2*(-jerk)*l_vel))/(-jerk),
-            // dejerk_dist = l_vel*dejerk_time + (0.5*l_acc + (1/6.0)*-jerk*dejerk_time)*dejerk_time*dejerk_time;
-    // printf("%.2f %.2f %.2f\n", dejerk_time, dejerk_dist, time);
-
-    // TODO: Handle case where the acceleration levels out
     float   max_a = (_setpoint > 0 ? _max_acceleration : -_max_acceleration);
-    float   jerk_switch_time = sqrt(2*(l_vel/2)/jerk),
-            jerk_accel_time = max_a / jerk;
+    float   triangle_peak_time = sqrt(2*(l_vel/2)/jerk),
+            saturation_time = (-max_a - l_acc)/(-jerk);
 
-    float   dejerk_dist = l_vel * jerk_switch_time;
-    if (fabs(jerk_accel_time) < fabs(jerk_switch_time)) {
-        float t0 = jerk_accel_time;
-        float v0 = l_vel + 0.5*-jerk*t0*t0;
-        float t1 = (2*v0-l_vel)/max_a;
-        float v1 = l_vel - v0;
-        float sixth = (1/6.0);
+    float   dejerk_dist = l_vel * triangle_peak_time;
+    if (fabs(saturation_time) < fabs(triangle_peak_time)) {
+        float t0 = (-max_a - l_acc)/(-jerk);
+        float t2 = max_a / jerk;
 
-        float s0 = l_vel*t0 + sixth*-jerk*t0*t0*t0;
-        float s1 = v0*t1 + 0.5*(-max_a)*t1*t1;
-        float s2 = v1*t0*t0 + 0.5*(-max_a)*t0*t0 + sixth*jerk*t0*t0*t0;
+        float a0 = l_acc;
+        float v0 = l_vel;
+        float sixth = 1 / 6.0;
+
+        float v1 = v0 + a0*t0 + 0.5*(-jerk)*t0*t0;
+        float v2 = max_a*t2 + 0.5*(-jerk)*t2*t2;
+
+        if (v1 < v2) t0 = 0;
+        float t1 = (v1-v2)/max_a;
+        if (t1 < 0) {
+            t2 = t2 + t1;
+            t1 = 0;
+        }
+
+        float s0 = v0*t0 + 0.5*a0*t0*t0 + sixth*(-jerk)*t0*t0*t0;
+        float s1 = v1*t1 + 0.5*(-max_a)*t1*t1;
+        float s2 = v2*t2 + 0.5*(-max_a)*t2*t2 + sixth*jerk*t2*t2*t2;
 
         dejerk_dist = s0+s1+s2;
     }
 
     float   dejerk_error = l_dist + dejerk_dist - _setpoint;
 
+    // TODO: Unfortunately we can't use trapezoidal profiles for the velocity profile.
+    // This is because we can't integrate the velocity the way we normally would, making it very
+    // difficult to accurately generate a path.
+
     if (fabs(dejerk_error) <= _tolerance 
             || (_setpoint < 0 && dejerk_error < -_tolerance)
             || (_setpoint > 0 && dejerk_error > _tolerance)) {
         
+        _velocity_profile._distance_integral = l_dist;
         _velocity_profile.setpoint(0);
         vpstatus = _velocity_profile.calculate(&vel_seg, &vel_seg_in, time);
 
         _jerk_out = vel_seg.acceleration;
         segment_out->acceleration = vel_seg.velocity;
         segment_out->velocity = vel_seg.distance;
-        segment_out->distance = l_dist + (vel_seg.distance * dt) + 0.5*(vel_seg.velocity)*dt*dt;
+        segment_out->distance = _velocity_profile._distance_integral;
         status = Pathfinder::Profile::STATUS_DECEL;
     } else if (fabs(l_vel) < _max_velocity - _tolerance) {
+        _velocity_profile._distance_integral = l_dist;
         _velocity_profile.setpoint(_setpoint < 0 ? -_max_velocity : _max_velocity);
         vpstatus = _velocity_profile.calculate(&vel_seg, &vel_seg_in, time);
 
         _jerk_out = vel_seg.acceleration;
         segment_out->acceleration = vel_seg.velocity;
         segment_out->velocity = vel_seg.distance;
-        segment_out->distance = l_dist + (vel_seg.distance * dt) + 0.5*(vel_seg.velocity)*dt*dt;
+        segment_out->distance = _velocity_profile._distance_integral;
         status = Pathfinder::Profile::STATUS_ACCEL;
     }
 
