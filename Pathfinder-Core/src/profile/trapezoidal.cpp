@@ -1,10 +1,11 @@
 #include "pathfinder/profile/trapezoidal.h"
 #include "pathfinder/math.h"
 
-void Pathfinder::Profile::Trapezoidal::configure(float max_velocity, float acceleration, float tolerance) {
+void Pathfinder::Profile::Trapezoidal::configure(float max_velocity, float acceleration, float timescale, float tolerance) {
     _max_velocity = max_velocity;
     _acceleration = acceleration;
     _tolerance = tolerance;
+    _timescale = timescale;
 
     _slconfigured = false;
 }
@@ -27,7 +28,7 @@ void Pathfinder::Profile::Trapezoidal::set_shift(int level) {
     _acceleration = _slvls[_slcurrent].acceleration;
 }
 
-uint8_t Pathfinder::Profile::Trapezoidal::calculate(Pathfinder::Segment *segment_out, Pathfinder::Segment *last_segment, float time) {
+uint8_t Pathfinder::Profile::Trapezoidal::calculate_single(Pathfinder::Segment *segment_out, Pathfinder::Segment *last_segment, float time) {
     // Will get destroyed at end of scope. Placed here in the event last_segment is nullptr (i.e. start of generation),
     // we make an assumption of position 0, velocity 0, acceleration 0 and time 0.
     Pathfinder::Segment zero_seg = { 0,0,0,0 };

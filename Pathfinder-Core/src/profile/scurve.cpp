@@ -1,17 +1,18 @@
 #include "pathfinder/profile/scurve.h"
 #include "pathfinder/math.h"
 
-void Pathfinder::Profile::SCurve::configure(float max_velocity, float max_acceleration, float jerk, float tolerance) {
+void Pathfinder::Profile::SCurve::configure(float max_velocity, float max_acceleration, float jerk, float timescale, float tolerance) {
     _max_velocity = max_velocity;
     _max_acceleration = max_acceleration;
     _jerk = jerk;
+    _timescale = timescale;
     _tolerance = tolerance;
 
-    _velocity_profile.configure(_max_acceleration, _jerk, tolerance);
+    _velocity_profile.configure(_max_acceleration, _jerk, timescale, tolerance);
     _velocity_profile.setpoint(max_velocity);
 }
 
-uint8_t Pathfinder::Profile::SCurve::calculate(Pathfinder::Segment *segment_out, Pathfinder::Segment *last_segment, float time) {
+uint8_t Pathfinder::Profile::SCurve::calculate_single(Pathfinder::Segment *segment_out, Pathfinder::Segment *last_segment, float time) {
     // Will get destroyed at end of scope. Placed here in the event last_segment is nullptr (i.e. start of generation),
     // we make an assumption of position 0, velocity 0, acceleration 0 and time 0.
     Pathfinder::Segment zero_seg = { 0,0,0,0 };

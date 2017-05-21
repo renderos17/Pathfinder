@@ -3,6 +3,15 @@
 #include "pathfinder/segments.h"
 #include <inttypes.h>
 
+#define PF_DEFAULT_TOLERANCE 0.05
+
+// 1/1000th time difference seems rediculously small,
+// however it helps a lot with generating the speed
+// up and speed down portions of the profile, as
+// it helps reduce the effect of a speed up/down being
+// required in between two generations.
+#define PF_DEFAULT_TIMESCALE 0.001
+
 namespace Pathfinder {
     namespace Profile {
         enum Status {
@@ -26,9 +35,14 @@ namespace Pathfinder {
             void tolerance(float newtolerance) { _tolerance = newtolerance; }
             float tolerance() { return _tolerance; }
 
-            virtual uint8_t calculate(Pathfinder::Segment *segment_out, Pathfinder::Segment *last_segment, float time) = 0;
+            // Setpoint Timescale Get/Set
+            void timescale(float newtimescale) { _timescale = newtimescale; }
+            float timescale() { return _timescale; }
 
-            float _setpoint = 0, _tolerance = 0.05;
+            virtual uint8_t calculate_single(Pathfinder::Segment *segment_out, Pathfinder::Segment *last_segment, float time) = 0;
+            virtual uint8_t calculate(Pathfinder::Segment *segment_out, Pathfinder::Segment *last_segment, float time);
+
+            float _setpoint = 0, _tolerance = PF_DEFAULT_TOLERANCE, _timescale = PF_DEFAULT_TIMESCALE;
         };
 
         struct Shiftable {

@@ -2,22 +2,20 @@
 
 #include "pathfinder/profile/profile.h"
 
-// Base on current { pos, vel, time } such that it can recalculate itself
-// Allow precalc, with optional regeneration?
-
 namespace Pathfinder {
     namespace Profile {
         struct Trapezoidal : Pathfinder::Profile::Profile, Pathfinder::Profile::Shiftable {
             Trapezoidal() {};
-            Trapezoidal(float max_velocity, float acceleration, float tolerance=0.05) {
-                configure(max_velocity, acceleration, tolerance);
+            Trapezoidal(float max_velocity, float acceleration, float target_timescale=PF_DEFAULT_TIMESCALE, float tolerance=PF_DEFAULT_TOLERANCE) {
+                configure(max_velocity, acceleration, target_timescale, tolerance);
             }
-            Trapezoidal(ShiftLevel *levels, int level_count) {
+            Trapezoidal(ShiftLevel *levels, int level_count, float target_timescale=PF_DEFAULT_TIMESCALE, float tolerance=PF_DEFAULT_TOLERANCE) {
+                configure(0, 0, target_timescale, tolerance);   // Configure timescale and tolerance
                 configure_shift(levels, level_count);
             }
-            void configure(float max_velocity, float acceleration, float tolerance=0.05);
+            void configure(float max_velocity, float acceleration, float target_timescale=PF_DEFAULT_TIMESCALE, float tolerance=PF_DEFAULT_TOLERANCE);
 
-            uint8_t calculate(Pathfinder::Segment *segment_out, Pathfinder::Segment *last_segment, float time);
+            uint8_t calculate_single(Pathfinder::Segment *segment_out, Pathfinder::Segment *last_segment, float time);
 
             void configure_shift(ShiftLevel *levels, int level_count);
             int shift_level();
