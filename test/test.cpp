@@ -1,29 +1,47 @@
 #include <pathfinder.h>
 
-#define BUF_SIZE 4096
+#include <iostream>
+#include <functional>
+#include <ctime>
 
-Pathfinder::Segment s1;
+using namespace Pathfinder;
 
-int samples = 10000;                        // High Sample Rate for a smooth curve
-double timescale = 0.01;                   // Generate points for every 0.01 seconds
+#define SIZE 32
+
+void timeit(std::function<void()> func) {
+    std::clock_t start = std::clock();
+
+    func();
+
+    int ms = (std::clock() - start) / (double) (CLOCKS_PER_SEC / 1000);
+
+    std::cout << "Finished in " << ms << "ms" << std::endl;
+}
 
 int main() {
-    float setpoint = 9;
-    float max_vel = 3;
-    float accel = 6;
-    float time = 0;
-
-    Pathfinder::Profile::SCurve profile(max_vel, accel, 10);
-    profile.setpoint(setpoint);
-    
-    FILE *fp = fopen("out/path.csv", "w");
-    fputs("time,distance,velocity,acceleration\n", fp);
-    int done = 0;
-    while (done != Pathfinder::Profile::STATUS_DONE && time < 7) {
-        done = profile.calculate(&s1, &s1, time);
-        fprintf(fp, "%.3f,%.3f,%.3f,%.3f\n", time, s1.distance, s1.velocity, s1.acceleration);
-        time += timescale;
+    Vec2 v[SIZE] = { };
+    for (int i = 0; i < SIZE; i++) {
+        v[i].x = i*2;
+        v[i].y = i*2+1;
     }
-    fclose(fp);
-    return 0;
+
+    Vec2Batch<SIZE> b(v);
+    Vec2Batch<SIZE> simd_b;
+    Vec2Batch<SIZE> nat_b;
+
+    timeit([&simd_b, &b] { for (int i = 0; i < 100000; i++) simd_b = b*2; });
+    timeit([&nat_b, &b] { for (int i = 0; i < 100000; i++) nat_b = b.mult(2); });
+
+    for (int i = 0; i < SIZE; i++) {
+        std::cout << (std::string) *b[i] << " ";
+    }
+    std::cout << "\n\n";
+    for (int i = 0; i < SIZE; i++) {
+        std::cout << (std::string) *simd_b[i] << " ";
+    }
+    std::cout << "\n";
+    for (int i = 0; i < SIZE; i++) {
+        std::cout << (std::string) *nat_b[i] << " ";
+    }
+    std::cout << "\n";
 }

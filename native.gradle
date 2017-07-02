@@ -64,7 +64,7 @@ subprojects {
                             assembler.executable = armCompilerPrefix + assembler.executable
 
                             cppCompiler.withArguments { args ->
-                                args << '-std=c++11' << '-fPIC' << '-rdynamic'
+                                args << '-std=c++11' << '-fPIC' << '-rdynamic' << '-fopenmp'
                             }
 
                             cCompiler.withArguments {args ->
@@ -90,7 +90,7 @@ subprojects {
                         assembler.executable = 'arm-frc-linux-gnueabi-' + assembler.executable
 
                         cppCompiler.withArguments { args ->
-                            args << '-std=c++11' << '-fPIC' << '-rdynamic'
+                            args << '-std=c++11' << '-fPIC' << '-rdynamic' << '-fopenmp'
                         }
 
                         cCompiler.withArguments {args ->
@@ -109,7 +109,7 @@ subprojects {
                 gcc(Gcc) {
                     target("x64") {
                         cppCompiler.withArguments { args ->
-                            args << '-std=c++11' << '-fPIC' << '-rdynamic'
+                            args << '-std=c++11' << '-fPIC' << '-rdynamic' << '-fopenmp'
                         }
                         cCompiler.withArguments {args ->
                             args << '-fPIC'
@@ -133,6 +133,33 @@ subprojects {
                             args << '-shared'
                         }
 
+                    }
+                }
+                macGcc6(Gcc) {
+                    target("x86") {
+                        cCompiler.executable = cCompiler.executable + "-6"
+                        cppCompiler.executable = cppCompiler.executable + "-6"
+
+                        cppCompiler.withArguments { args ->
+                            args << '-std=c++11' << '-fPIC' << '-rdynamic' << '-fopenmp'
+                        }
+                        
+                        linker.withArguments { args ->
+                            args << '-shared'
+                        }
+                    }
+                    target("x64") {
+                        cCompiler.executable = cCompiler.executable + "-6"
+                        cppCompiler.executable = cppCompiler.executable + "-6"
+
+                        cppCompiler.withArguments { args ->
+                            args << '-std=c++11' << '-fPIC' << '-rdynamic' << '-fopenmp'
+                            args << '-m32'
+                        }
+                        
+                        linker.withArguments { args ->
+                            args << '-shared'
+                        }
                     }
                 }
                 clang(Clang) {
