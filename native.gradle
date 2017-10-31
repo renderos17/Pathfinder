@@ -1,23 +1,27 @@
 import org.gradle.internal.os.OperatingSystem
-ext.isArm = hasProperty("arm")
-def compilerPrefix = project.hasProperty('compilerPrefix') ? project.compilerPrefix : 'arm-frc-linux-gnueabi-'
+import org.gradle.nativeplatform.NativeBinarySpec
+
+def armCompilerPrefix = project.hasProperty('armCompilerPrefix') ? project.armCompilerPrefix : null
+def toolChainPath = project.hasProperty('toolChainPath') ? project.toolChainPath : null
+def roborioToolchain = project.hasProperty('roborioToolchain') ? project.roborioToolchain : null
 
 subprojects {
     plugins.withType(CPlugin).whenPluginAdded {
         model {
             platforms {
-                if (isArm) {
-                    arm {
-                        architecture 'arm'
-                        operatingSystem 'linux'
-                    }
-                } else {
-                    x86 {
-                        architecture 'x86'
-                    }
-                    x64 {
-                        architecture 'x86_64'
-                    }
+                arm {
+                    architecture 'arm'
+                    operatingSystem 'linux'
+                }
+                roborio {
+                    architecture 'arm'
+                    operatingSystem 'linux'
+                }
+                x86 {
+                    architecture 'x86'
+                }
+                x64 {
+                    architecture 'x86_64'
                 }
             }
             
@@ -50,13 +54,45 @@ subprojects {
                         }
                     }
                 }
-                
-                gcc(Gcc) {
-                    target("arm") {
-                        cCompiler.executable = compilerPrefix + cCompiler.executable
-                        linker.executable = compilerPrefix + linker.executable
-                        assembler.executable = compilerPrefix + assembler.executable
-                        
+                armGcc(Gcc) {
+                    if (toolChainPath != null) path(toolChainPath)
+                    if (armCompilerPrefix != null) {
+                        target("arm") {
+                            cCompiler.executable = armCompilerPrefix + cCompiler.executable
+                            cppCompiler.executable = armCompilerPrefix + cppCompiler.executable
+                            linker.executable = armCompilerPrefix + linker.executable
+                            assembler.executable = armCompilerPrefix + assembler.executable
+
+                            cppCompiler.withArguments { args ->
+                                args << '-std=c++11' << '-fPIC' << '-rdynamic'
+                            }
+
+                            cCompiler.withArguments {args ->
+                                args << '-fPIC'
+                                args.remove("-m32")
+                            }
+                            
+                            linker.withArguments { args ->
+                                args << '-shared'
+                                args.remove('-m32')
+                            }
+                            
+                            staticLibArchiver.executable = armCompilerPrefix + staticLibArchiver.executable
+                        }
+                    }
+                }
+                roborioGcc(Gcc) {
+                    if (roborioToolchain != null) path(roborioToolchain)
+                    target("roborio") {
+                        cCompiler.executable = 'arm-frc-linux-gnueabi-' + cCompiler.executable
+                        cppCompiler.executable = 'arm-frc-linux-gnueabi-' + cppCompiler.executable
+                        linker.executable = 'arm-frc-linux-gnueabi-' + linker.executable
+                        assembler.executable = 'arm-frc-linux-gnueabi-' + assembler.executable
+
+                        cppCompiler.withArguments { args ->
+                            args << '-std=c++11' << '-fPIC' << '-rdynamic'
+                        }
+
                         cCompiler.withArguments {args ->
                             args << '-fPIC'
                             args.remove("-m32")
@@ -67,9 +103,14 @@ subprojects {
                             args.remove('-m32')
                         }
                         
-                        staticLibArchiver.executable = compilerPrefix + staticLibArchiver.executable
+                        staticLibArchiver.executable = 'arm-frc-linux-gnueabi-' + staticLibArchiver.executable
                     }
-		    target("x64") {
+                }
+                gcc(Gcc) {
+                    target("x64") {
+                        cppCompiler.withArguments { args ->
+                            args << '-std=c++11' << '-fPIC' << '-rdynamic'
+                        }
                         cCompiler.withArguments {args ->
                             args << '-fPIC'
                         }
@@ -80,6 +121,10 @@ subprojects {
 
                     }
                     target("x86") {
+                        cppCompiler.withArguments { args ->
+                            args << '-std=c++11' << '-fPIC' << '-rdynamic'
+                            args << '-m32'
+                        }
                         cCompiler.withArguments {args ->
                             args << '-fPIC'
                         }
@@ -90,24 +135,19 @@ subprojects {
 
                     }
                 }
-                
-                macGcc(Clang) {
-                    target("arm") {
-                        cCompiler.executable = compilerPrefix + "gcc"
-                        linker.executable = compilerPrefix + "gcc"
-                        assembler.executable = compilerPrefix + "gcc"
-                        
-                        cCompiler.withArguments {args ->
-                            args << '-fPIC'
-                            args.remove("-m32")
+                clang(Clang) {
+                    target('x86') {
+                        cppCompiler.withArguments { args ->
+                            args << '-std=c++11' << '-fPIC' << '-m32'
                         }
-                        
                         linker.withArguments { args ->
-                            args << '-shared'
-                            args.remove('-m32')
+                            args << '-m32'
                         }
-                        
-                        staticLibArchiver.executable = compilerPrefix + "ar"
+                    }
+                    target('x64') {
+                        cppCompiler.withArguments { args ->
+                            args << '-std=c++11' << '-fPIC'
+                        }
                     }
                 }
             }
@@ -115,33 +155,33 @@ subprojects {
     }
 }
 
-project.ext.installBinary = { binary, headers ->
-    def allHeaders = fileTree(dir: headers.absolutePath, include: '**/*.h').getFiles().collect { file ->
-        file.absolutePath
-    }
+// project.ext.installBinary = { binary, headers ->
+//     def allHeaders = fileTree(dir: headers.absolutePath, include: '**/*.h').getFiles().collect { file ->
+//         file.absolutePath
+//     }
     
-    def prefix = "/usr/local"
-    if (project.hasProperty("prefix")) prefix = project.prefix
+//     def prefix = "/usr/local"
+//     if (project.hasProperty("prefix")) prefix = project.prefix
     
-    if (allHeaders.size > 0) {
-        exec {
-            executable "install"
-            args "-m", "0755", "-d", "$prefix/include"
-        }
+//     if (allHeaders.size > 0) {
+//         exec {
+//             executable "install"
+//             args "-m", "0755", "-d", "$prefix/include"
+//         }
        
-        exec {
-            executable "cp"
-            args "-r", "${headers.absolutePath}/", "$prefix/include"
-        }
-    }
+//         exec {
+//             executable "cp"
+//             args "-r", "${headers.absolutePath}/", "$prefix/include"
+//         }
+//     }
     
-    exec {
-        executable "install"
-        args "-m", "0755", "-d", "$prefix/lib"
-    }
+//     exec {
+//         executable "install"
+//         args "-m", "0755", "-d", "$prefix/lib"
+//     }
     
-    exec {
-        executable "install"
-        args "-m", "0755", "${binary.absolutePath}", "$prefix/lib"
-    }
-}
+//     exec {
+//         executable "install"
+//         args "-m", "0755", "${binary.absolutePath}", "$prefix/lib"
+//     }
+// }

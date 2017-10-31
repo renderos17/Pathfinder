@@ -2,7 +2,7 @@ apply plugin: 'c'
 
 model {
     components {
-        pathfinder(NativeLibrarySpec) {
+        pathfinder_test(NativeExecutableSpec) {
             targetPlatform 'arm'
             targetPlatform 'roborio'
             targetPlatform 'x86'
@@ -11,15 +11,12 @@ model {
             sources {
                 c {
                     source {
-                        srcDirs = ['src']
-                        includes = ['**/*.c']
+                        srcDirs = ["."]
+                        includes = ["test.cpp"]
                     }
-                    exportedHeaders {
-                        srcDirs = ['include']
-                    }
+                    lib project: ":Pathfinder-Core", library: "pathfinder", linkage: "static"
                 }
             }
         }
     }
-    
 }
