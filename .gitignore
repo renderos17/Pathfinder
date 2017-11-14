@@ -29,13 +29,9 @@ test/build
 out/
 .idea
 
-<<<<<<< HEAD
-/test/
+.vscode/
 
 #LabVIEW files
 *.lvlps
 
 *.aliases
-=======
-.vscode/
->>>>>>> upstream/master
