@@ -2,7 +2,9 @@
 
 #include <stdlib.h>
 
-int pathfinder_prepare(Waypoint *path, int path_length, void (*fit)(Waypoint,Waypoint,Spline*), int sample_count, double dt,
+TrajectoryCandidate cand_LV;
+
+int pathfinder_prepare(const Waypoint *path, int path_length, void (*fit)(Waypoint,Waypoint,Spline*), int sample_count, double dt,
         double max_velocity, double max_acceleration, double max_jerk, TrajectoryCandidate *cand) {
     if (path_length < 2) return -1;
     
@@ -31,7 +33,30 @@ int pathfinder_prepare(Waypoint *path, int path_length, void (*fit)(Waypoint,Way
     cand->info = info;
     cand->config = config;
     
-    return 0;
+    return trajectory_length;
+}
+
+/********************************************************************************************
+*   LabVIEW memory allocation works different from C and a DLL call requires any memory 
+*   be allocated up front for pointers that are used as outputs (i.e. 'trajectory candidate').
+*   For the mode we could probably pass out the function pointer to LabVIEW via a function
+*   and pass it back in, but for now we can keep it static as cubic. Other option is to
+*   pass in a flag selecting which path algorithm, and make it an enum in the LabVIEW API.
+*   
+*   For the 'trajectory candidate' we don't want to expose it to LabVIEW at all, since we
+*   would need to know the sizeof 'Spline' and 'double' on the target and pre-allocate it.
+*   Instead, we keep it in the DLL memory and return a length instead of a status so we 
+*   an allow LabVIEW to create the segments array.
+*********************************************************************************************/
+int pathfinder_prepare_LabVIEW(const Waypoint *path, int path_length, int sample_count, double dt,
+        double max_velocity, double max_acceleration, double max_jerk)
+{
+    return pathfinder_prepare(path,path_length,FIT_HERMITE_CUBIC,sample_count,dt,max_velocity,max_acceleration,max_jerk,&cand_LV);
+}
+
+int pathfinder_generate_LabVIEW(Segment *segments)
+{
+    return pathfinder_generate(&cand_LV,segments);
 }
 
 int pathfinder_generate(TrajectoryCandidate *c, Segment *segments) {

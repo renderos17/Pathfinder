@@ -30,3 +30,8 @@ out/
 .idea
 
 .vscode/
+
+#LabVIEW files
+*.lvlps
+
+*.aliases
