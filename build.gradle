@@ -1,15 +1,37 @@
+plugins {
+    id "jaci.openrio.gradle.GradleRIO" version "2018.01.07" apply false
+    id "jaci.gradle.EmbeddedTools" version "2018.01.06b" apply false
+}
+
 allprojects {
     repositories {
         mavenCentral()
     }
+    apply plugin: 'idea'
+
+    version = '1.8'
 }
 
 subprojects {
-    apply plugin: 'idea'
+    apply plugin: 'jaci.openrio.gradle.GradleRIO'
+    apply plugin: 'maven-publish'
+    plugins.withType(CPlugin).whenPluginAdded {
+        project.apply plugin: "visual-studio"
+    }
+
+    publishing {
+        repositories {
+            maven {
+                url("sftp://imjac.in:22/home/maven/public")
+                credentials {
+                    username 'maven'
+                    password file(java.nio.file.Paths.get(System.getProperty('user.home')).resolve('imjacinta.maven.cred')).text
+                }
+            }
+        }
+    }
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.12'
+    gradleVersion = '4.4'
 }
-
-apply from: 'native.gradle'

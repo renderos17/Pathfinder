@@ -1,5 +1,4 @@
 include 'Pathfinder-Core',
-        'Pathfinder-Java',
-        'test'
+        'Pathfinder-Java'
         
 rootProject.name = "Pathfinder"

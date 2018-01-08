@@ -65,7 +65,7 @@ int pf_trajectory_fromSecondOrderFilter(int filter_1_l, int filter_2_l,
     }
     
     // double f1_buffer[len];
-    double *f1_buffer = malloc(len * sizeof(double));       // VS doesn't support VLAs
+    double *f1_buffer = (double *)malloc(len * sizeof(double));       // VS doesn't support VLAs
     f1_buffer[0] = (u / v) * filter_1_l;
     double f2;
     

@@ -3,75 +3,18 @@ package jaci.pathfinder;
 import jaci.pathfinder.followers.EncoderFollower;
 import jaci.pathfinder.modifiers.SwerveModifier;
 
-import java.io.*;
-
 public class PathfinderJNI {
 
     static boolean libLoaded = false;
-    static File jniLib = null;
 
     static {
         if (!libLoaded) {
             try {
-                String os = System.getProperty("os.name");
-                String resolvedName;
-
-                if (os.startsWith("Windows"))
-                    resolvedName = "/Win/" + System.getProperty("os.arch") + "/";
-                else if (os.toLowerCase().contains("mac"))
-                    resolvedName = "/Mac/" + System.getProperty("os.arch") + "/";
-                else
-                    resolvedName = "/Linux/" + System.getProperty("os.arch") + "/";
-
-                System.err.println("Platform: " + resolvedName);
-                loadLibrary(resolvedName, "pathfinderjava", "pathfinderJNI");
-            } catch (IOException e) {
+                System.loadLibrary("pathfinderjava");
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             libLoaded = true;
-        }
-    }
-
-    public static void loadLibrary(String resolved, String libname, String tempname) throws IOException {
-        String os = System.getProperty("os.name");
-
-        if (os.startsWith("Windows"))
-            resolved += libname + ".dll";
-        else if (os.startsWith("Mac"))
-            resolved += "lib" + libname + ".dylib";
-        else
-            resolved += "lib" + libname + ".so";
-
-        InputStream is = PathfinderJNI.class.getResourceAsStream(resolved);
-        if (is != null) {
-            // Copy to temp file so we can actually load it
-            if (os.startsWith("Windows"))
-                jniLib = File.createTempFile(tempname, ".dll");
-            else if (os.startsWith("Mac"))
-                jniLib = File.createTempFile(tempname, ".dylib");
-            else
-                jniLib = File.createTempFile(tempname, ".so");
-
-            jniLib.deleteOnExit();
-            OutputStream ous = new FileOutputStream(jniLib);
-
-            byte[] buffer = new byte[1024];
-            int readBytes;
-            try {
-                while ((readBytes = is.read(buffer)) != -1) {
-                    ous.write(buffer, 0, readBytes);
-                }
-            } finally {
-                ous.close();
-                is.close();
-            }
-            try {
-                System.load(jniLib.getAbsolutePath());
-            } catch (UnsatisfiedLinkError e) {
-                System.loadLibrary(libname);
-            }
-        } else {
-            System.loadLibrary(libname);
         }
     }
 

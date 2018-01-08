@@ -35,3 +35,7 @@ out/
 *.lvlps
 
 *.aliases
+
+*.iml
+*.ipr
+*.iws
