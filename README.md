@@ -23,8 +23,23 @@ Swerve Drive:
 ![](img/swerve.png)
 
 ## Part of the FIRST Robotics Competition?
-We've got some Wiki Entries for you. After you've read this README, go to the [wiki](https://github.com/JacisNonsense/Pathfinder/wiki/) 
-to learn more about how to integrate Pathfinder into your FRC application!
+Add the following lines to your build.gradle if you're using GradleRIO (2018.01.11 or higher):
+
+### Java:
+```gradle
+dependencies {
+    compile pathfinder()
+}
+```
+
+### C++:
+```gradle
+model {
+    frcUserProgram(NativeExecutableSpec) {
+        lib library: "pathfinder"
+    }
+}
+```
 
 ## Building
 To build the project, run the following command:
