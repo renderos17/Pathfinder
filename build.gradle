@@ -22,10 +22,15 @@ subprojects {
     publishing {
         repositories {
             maven {
-                url("sftp://imjac.in:22/home/maven/public")
-                credentials {
-                    username 'maven'
-                    password file(java.nio.file.Paths.get(System.getProperty('user.home')).resolve('imjacinta.maven.cred')).text
+                def pwdfile = file(java.nio.file.Paths.get(System.getProperty('user.home')).resolve('imjacinta.maven.cred'))
+                if (pwdfile.exists() && !project.hasProperty('mavenlocal')) {
+                    url("sftp://imjac.in:22/home/maven/public")
+                    credentials {
+                        username 'maven'
+                        password pwdfile.text
+                    }
+                } else {
+                    url("${project.buildDir}/repo")
                 }
             }
         }
