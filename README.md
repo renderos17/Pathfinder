@@ -41,31 +41,7 @@ model {
 }
 ```
 
-## Building
-To build the project, run the following command:
-```
-./gradlew build
-./gradlew assemble
-```
-
-To build the C code only:
-```
-./gradlew :Pathfinder-Core:build
-```
-
-To build the Java code:
-```
-./gradlew :Pathfinder-Java:build
-./gradlew :Pathfinder-Java:assemble
-```
-
-This will build for both the x64 and x86 architecture for your platform. To cross compile for ARM, do the following:
-```
-./gradlew build -Parm -PcompilerPrefix=arm-linux-gnueabi-
-./gradlew assemble
-```
-
-## Installing on your Architecture
+## Building / Installing on your Architecture
 If you want to use Pathfinder on your system, you will have to build the library for your platform. You can do this with the following:
 
 ```java
