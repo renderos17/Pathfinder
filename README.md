@@ -66,24 +66,13 @@ This will build for both the x64 and x86 architecture for your platform. To cros
 ```
 
 ## Installing on your Architecture
-If your OS or Architecture doesn't fall under the prebuilt binaries that are available with the library, you can 
-install pathfinder's native binaries onto your local system manually. This will allow you to include the library
-in any project you want
+If you want to use Pathfinder on your system, you will have to build the library for your platform. You can do this with the following:
 
-64-Bit
 ```java
-./gradlew install
+./gradlew build
 ```
 
-32-Bit
-```java
-./gradlew install -P32
-```
-
-If you want to change the prefix location (by default it is `/usr/local`), you can pass the `prefix` property:
-```java
-./gradlew install -Pprefix=<your prefix location>
-```
+The native libraries will be located under `./Pathfinder-Core/build/libs/pathfinder/` (shared and static libs, platform=any64) and `./Pathfinder-Java/build/libs/pathfinderjava/shared/any64`. If you're using native shared (or java), you must put these somewhere on your system load path (e.g. Mac/Linux = `/usr/local`, Windows = Somwhere on PATH)
 
 ## Usage
 To see the usage for each language variation of the API, see the README in their folder.
