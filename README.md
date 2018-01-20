@@ -41,6 +41,10 @@ model {
 }
 ```
 
+**If you're not using GradleRIO, do the following:**
+Download this and put `libpathfinder.a` in `~/wpilib/user/cpp/lib`: http://dev.imjac.in/maven/jaci/pathfinder/Pathfinder-Core/1.8/Pathfinder-Core-1.8-athena.zip 
+Download this and extract all of its contents to `~/wpilib/user/cpp/include`: http://dev.imjac.in/maven/jaci/pathfinder/Pathfinder-Core/1.8/Pathfinder-Core-1.8-headers.zip 
+
 ## Building / Installing on your Architecture
 If you want to use Pathfinder on your system, you will have to build the library for your platform. You can do this with the following:
 
