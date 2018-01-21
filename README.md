@@ -42,6 +42,11 @@ model {
 ```
 
 **If you're not using GradleRIO, do the following:**  
+### Java
+If you're not using GradleRIO, you must download this manually and copy into `~/wpilib/user/java/lib`: http://dev.imjac.in/maven/jaci/pathfinder/Pathfinder-Java/1.8/Pathfinder-Java-1.8.jar  
+You also have to download this, extract it, and place `libpathfinder.so` into `~/wpilib/user/java/lib`: http://dev.imjac.in/maven/jaci/pathfinder/Pathfinder-JNI/1.8/Pathfinder-JNI-1.8-athena.zip
+
+### C++
 Download this and put `libpathfinder.a` in `~/wpilib/user/cpp/lib`: http://dev.imjac.in/maven/jaci/pathfinder/Pathfinder-Core/1.8/Pathfinder-Core-1.8-athena.zip   
 Download this and extract all of its contents to `~/wpilib/user/cpp/include`: http://dev.imjac.in/maven/jaci/pathfinder/Pathfinder-Core/1.8/Pathfinder-Core-1.8-headers.zip   
 
