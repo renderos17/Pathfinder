@@ -67,3 +67,7 @@ To see the usage for each language variation of the API, see the README in their
 | C        | [Pathfinder-Core](Pathfinder-Core/) |
 | Java     | [Pathfinder-Java](Pathfinder-Java/) |
 | LabVIEW  | [Pathfinder-LabVIEW](Pathfinder-LabVIEW/) |
+
+## Other languages
+
+The RobotPy project has created python bindings around the Pathfinder libraries, and can be found at https://github.com/robotpy/robotpy-pathfinder
